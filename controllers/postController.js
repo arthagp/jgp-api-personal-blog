@@ -27,15 +27,14 @@ class PostController {
             model: Comments,
           },
           {
-            model: User, // Assuming your user model is named 'Users'
-            attributes: ['username'], // Add other user attributes you need
+            model: User, 
+            attributes: ['username'], 
           },
         ],
       });
-  
-      // Transform rows to include username from Users model
+
       const postsWithUsername = rows.map((post) => {
-        const { username } = post.User; // User refers to the Users model
+        const { username } = post.User; 
         return {
           ...post.dataValues,
           username,
@@ -51,6 +50,28 @@ class PostController {
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  static async getPostById(req, res) {
+    try {
+      const {postId} = req.params
+      const response = await Posts.findByPk(postId, {
+        include: [
+          {
+            model: Tags,
+          },{
+            model: Comments,
+          }
+        ]
+      })
+      if (!response) {
+        res.status(404).json({message: 'Post Not Found'})
+      } else {
+        res.status(200).json({message: 'Found', data: response})
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
   
