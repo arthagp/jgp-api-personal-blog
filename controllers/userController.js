@@ -23,6 +23,15 @@ class UserController {
       console.log(error);
     }
   }
+
+  static async getUsernameAndId(req, res) {
+    try {
+      const response = await User.findAll({attributes: ['id', 'username']});
+      res.status(200).json({message: 'Found it', data: response })
+    } catch (error) {
+      console.log(error)
+    }
+  }
   static async login(req, res) {
     try {
       const { username, password } = req.body;
@@ -46,7 +55,7 @@ class UserController {
           );
           res
             .status(201)
-            .json({ message: "login succes", id: findOneUser.id, token });
+            .json({ message: "login succes", id: findOneUser.id, username: findOneUser.username, token });
         } else {
           res.status(404).json({ message: "Wrong Password" });
         }

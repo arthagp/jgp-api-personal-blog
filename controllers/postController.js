@@ -1,4 +1,4 @@
-const { Posts, Tags, sequelize, Comments } = require("../models");
+const { Posts, Tags, sequelize, Comments , User} = require("../models");
 const { Op } = require("sequelize");
 
 class PostController {
@@ -6,13 +6,15 @@ class PostController {
     try {
       const { title } = req.query;
       const where = {};
-
+  
       const limit = +req.query.limit || 10;
       const page = +req.query.page || 1;
       const offset = (page - 1) * limit;
+  
       if (title) {
         where.title = { [Op.iLike]: `%${title}%` };
       }
+  
       const { count, rows } = await Posts.findAndCountAll({
         where,
         limit,
@@ -23,20 +25,35 @@ class PostController {
           },
           {
             model: Comments,
-            // order: [['createdAt', 'DESC']],
+          },
+          {
+            model: User, // Assuming your user model is named 'Users'
+            attributes: ['username'], // Add other user attributes you need
           },
         ],
       });
+  
+      // Transform rows to include username from Users model
+      const postsWithUsername = rows.map((post) => {
+        const { username } = post.User; // User refers to the Users model
+        return {
+          ...post.dataValues,
+          username,
+        };
+      });
+  
       res.status(200).json({
         totalItems: count,
-        data: rows,
+        data: postsWithUsername,
         currentPage: page,
         totalPages: Math.ceil(count / limit),
       });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+  
 
   static async createPost(req, res) {
     let t = await sequelize.transaction();
