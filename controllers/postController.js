@@ -62,6 +62,10 @@ class PostController {
             model: Tags,
           },{
             model: Comments,
+            include: {
+              model: User, // untuk mengetahui username yang comment
+              attributes: ["username"],
+            },
           }
         ]
       })
