@@ -3,12 +3,12 @@ const { Tags } = require("../models");
 class TagsController {
   static async allTags(req, res) {
     try {
-      const response = await Tags.findAll({ order: [["id", "ASC"]] });
+      const data = await Tags.findAll({ order: [["id", "ASC"]] });
 
-      if (!response) {
+      if (!data) {
         res.status(400).json({ message: "Tags Not Found" });
       }
-      res.status(200).json({ message: "Tags Found", response });
+      res.status(200).json({ message: "Tags Found", data });
     } catch (error) {
       console.log(error);
     }

@@ -1,4 +1,4 @@
-const { Posts, Tags, sequelize, Comments , User} = require("../models");
+const { Posts, Tags, sequelize, Comments, User } = require("../models");
 const { Op } = require("sequelize");
 
 class PostController {
@@ -6,15 +6,15 @@ class PostController {
     try {
       const { title } = req.query;
       const where = {};
-  
+
       const limit = +req.query.limit || 10;
       const page = +req.query.page || 1;
       const offset = (page - 1) * limit;
-  
+
       if (title) {
         where.title = { [Op.iLike]: `%${title}%` };
       }
-  
+
       const { count, rows } = await Posts.findAndCountAll({
         where,
         limit,
@@ -27,20 +27,20 @@ class PostController {
             model: Comments,
           },
           {
-            model: User, 
-            attributes: ['username'], 
+            model: User,
+            attributes: ["username"],
           },
         ],
       });
 
       const postsWithUsername = rows.map((post) => {
-        const { username } = post.User; 
+        const { username } = post.User;
         return {
           ...post.dataValues,
           username,
         };
       });
-  
+
       res.status(200).json({
         totalItems: count,
         data: postsWithUsername,
@@ -49,36 +49,37 @@ class PostController {
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
   static async getPostById(req, res) {
     try {
-      const {postId} = req.params
+      const { postId } = req.params;
       const response = await Posts.findByPk(postId, {
         include: [
+          { model: User, attributes: ["username"] },
           {
             model: Tags,
-          },{
+          },
+          {
             model: Comments,
             include: {
               model: User, // untuk mengetahui username yang comment
               attributes: ["username"],
             },
-          }
-        ]
-      })
+          },
+        ],
+      });
       if (!response) {
-        res.status(404).json({message: 'Post Not Found'})
+        res.status(404).json({ message: "Post Not Found" });
       } else {
-        res.status(200).json({message: 'Found', data: response})
+        res.status(200).json({ message: "Found", data: response });
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
-  
 
   static async createPost(req, res) {
     let t = await sequelize.transaction();
@@ -169,7 +170,7 @@ class PostController {
         const data = await Posts.findByPk(postId);
         return res
           .status(200)
-          .json({ message: "Post Updated", dataUpdated: data });
+          .json({ message: "Post Updated", data: data });
       }
     } catch (error) {
       console.log(error);
