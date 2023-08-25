@@ -33,7 +33,12 @@ module.exports = (sequelize, DataTypes) => {
   Posts.init({
     user_id: DataTypes.INTEGER,
     title: DataTypes.STRING,
-    description: DataTypes.STRING
+    description: {
+      type: DataTypes.STRING,
+      validate: {
+        len: [0, 5000],
+      },
+    },
   }, {
     sequelize,
     modelName: 'Posts',
