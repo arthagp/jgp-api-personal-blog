@@ -2,32 +2,34 @@ const { Comments, sequelize, Posts } = require("../models");
 
 class CommentController {
   static async createComment(req, res) {
-      try {
-        const { id } = req.userLogged;
-        const { postId } = req.params;
-        const { comment } = req.body;
-  
-        const postInstance = await Posts.findByPk(postId);
-  
-        if (!postInstance) {
-          return res.status(400).json({ message: "Post Not Found" });
-        }
-  
-        const response = await Comments.create({
-          post_id: postId,
-          user_id: id,
-          comment,
-        });
-  
-        res.status(201).json({
-          message: "Comment Created",
-          data: response,
-          post: { post_id: postInstance.id },
-        });
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "An error occurred while creating the comment." });
+    try {
+      const { id } = req.userLogged;
+      const { postId } = req.params;
+      const { comment } = req.body;
+
+      const postInstance = await Posts.findByPk(postId);
+
+      if (!postInstance) {
+        return res.status(400).json({ message: "Post Not Found" });
       }
+
+      const response = await Comments.create({
+        post_id: postId,
+        user_id: id,
+        comment,
+      });
+
+      res.status(201).json({
+        message: "Comment Created",
+        data: response,
+        post: { post_id: postInstance.id },
+      });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ message: "An error occurred while creating the comment." });
+    }
   }
 
   static async getAllComments(req, res) {
@@ -35,7 +37,7 @@ class CommentController {
       const { postId } = req.params;
 
       const postInstance = await Posts.findByPk(postId, {
-        include: [{ model: Comments, order: [["createdAt", "DESC"]] }],
+        include: [{ model: Comments, order: [["id", "DESC"]] }],
       });
 
       if (!postInstance) {

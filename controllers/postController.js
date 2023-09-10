@@ -2,6 +2,21 @@ const { Posts, Tags, sequelize, Comments, User } = require("../models");
 const { Op } = require("sequelize");
 
 class PostController {
+  static async getPostByUserId(req, res) {
+    try {
+      const { id } = req.userLogged
+      const response = await Posts.findAll({ where: { user_id: id }, include: [{ model: Tags }] })
+      if (response) {
+        res.status(200).json({ data: response })
+      } else {
+        res.status(404).json({ message: 'Not Found' })
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
   static async getAllPost(req, res) {
     try {
       const { title } = req.query;
@@ -56,19 +71,19 @@ class PostController {
   static async getPostById(req, res) {
     try {
       const { postId } = req.params;
-      const response = await Posts.findByPk(postId, {
+      const response = await Posts.findOne({
+        where: { id: postId },
         include: [
-          { model: User, attributes: ["username"] },
-          {
-            model: Tags,
-          },
           {
             model: Comments,
             include: {
               model: User, // untuk mengetahui username yang comment
               attributes: ["username"],
             },
+            order: [['id', 'DESC']] // Menggunakan format array untuk order
           },
+          { model: User, attributes: ["username"] },
+          { model: Tags },
         ],
       });
       if (!response) {

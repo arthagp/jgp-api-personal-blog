@@ -8,5 +8,7 @@ router.get('/detail-post/:postId', PostController.getPostById)
 router.post('/new-post', authentication, PostController.createPost)
 router.put('/edit-post/:postId', authentication, PostController.editPost)
 router.delete('/delete-post/:postId', authentication, PostController.destroyPost)
+// get blog by user id
+router.get('/my-blog', authentication, PostController.getPostByUserId);
 
 module.exports = router
